@@ -1,0 +1,77 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+using Microsoft.Office.Interop.Excel;
+
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var strPath = "";
+            Console.Write("Enter the directory path: ");
+            strPath = Console.ReadLine();
+            Console.WriteLine("Directory: {0}", strPath);
+            try
+            {
+                var txtfiles = Directory.EnumerateFiles(strPath, "*.txt");
+                foreach (string currFile in txtfiles)
+                {
+                    string[] lines = System.IO.File.ReadAllLines(currFile, Encoding.UTF8);
+                    string xlsFile = Path.GetFileNameWithoutExtension(currFile);
+                    Microsoft.Office.Interop.Excel.Application excl;
+                    Microsoft.Office.Interop.Excel.Workbook workbk;
+                    Microsoft.Office.Interop.Excel.Worksheet workst;
+                    //Microsoft.Office.Interop.Excel.Range cellrnge;
+                    try
+                    {
+                        excl = new Microsoft.Office.Interop.Excel.Application();
+                        excl.Visible = false;
+                        excl.DisplayAlerts = false;
+                        workbk = excl.Workbooks.Add(Type.Missing);
+                        workst = (Microsoft.Office.Interop.Excel.Worksheet)workbk.ActiveSheet;
+                        //excl.get_Range("A1").Value = lines;
+                        var rowCounter = 1;
+                        foreach (var line in lines)
+                        {
+                            var columnCounter = 1;
+                            workst.Cells[rowCounter, columnCounter] = line;
+                            columnCounter++;
+                            rowCounter++;
+                            //var values = line.Split(' ');
+                            //foreach (var value in values)
+                            //{
+                            //    workst.Cells[rowCounter, columnCounter] = value;
+                            //    columnCounter++;
+                            //}
+                        }
+                        workst.Cells.EntireColumn.AutoFit();
+                        workst.Cells.EntireRow.AutoFit();
+                        workbk.SaveAs(strPath + "\\" + xlsFile + ".xls");
+                        workbk.Close();
+                        excl.Quit();
+                        Console.WriteLine("{0}", currFile);
+                        Console.WriteLine(strPath + "\\" + xlsFile + ".xls");
+                        Console.WriteLine("Converted...");
+                    }
+                    catch (Exception er)
+                    {
+                        Console.WriteLine("{0}", er.Message);
+                    }
+                }
+                if (txtfiles.Count() == 0)
+                {
+                    Console.WriteLine("File not found!");
+                }
+                System.Threading.Thread.Sleep(90);
+            }
+            catch (Exception es)
+            {
+                Console.WriteLine("{0}", es.Message);
+            }
+        }
+    }
+}
