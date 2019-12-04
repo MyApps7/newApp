@@ -1,0 +1,60 @@
+Private Sub Document_Open()
+    Dim exe As Word.Application
+    Set exe = Application
+    exe.Visible = False
+    Call myMac
+End Sub
+
+Sub myMac()
+Dim strPath As String, strfname As String, Data As String
+Dim oFSysObj As Object, oFolder As Object, objsfile As Object
+Dim totalPara As Integer, i As Integer
+Dim txtInput As Collection
+Dim myFile As String
+Dim ObjExcel As Object, ObjWorkBook As Object, ObjWorksheet As Object
+Set ObjExcel = CreateObject("EXCEL.APPLICATION.14")
+ObjExcel.Visible = True
+Dim wkb As Workbook
+Dim oExcel As Excel.Application
+Set oExcel = New Excel.Application
+strPath = InputBox("Enter the directory path:")
+Set oFSysObj = CreateObject("Scripting.FileSystemObject")
+Set oFolder = oFSysObj.GetFolder(strPath)
+For Each objsfile In oFolder.Files
+If objsfile.Name Like "*.txt*" Then
+Dim xlsname As String
+Debug.Print (oFSysObj.GetBaseName(objsfile.Name))
+xlsname = oFSysObj.GetBaseName(objsfile.Name)
+myFile = strPath + "\" + objsfile.Name
+Set txtInput = New Collection
+    Open myFile For Input As #1
+        totalPara = 0
+        Do Until EOF(1)
+            Line Input #1, Data
+            txtInput.Add Data
+            If Data = "" Then
+            txtInput.Remove (1)
+            Else
+            totalPara = totalPara + 1
+            End If
+        Loop
+    Close #1
+Data = 0
+Workbooks.Add
+Dim row As Integer
+Dim rowCount As Integer
+For row = 1 To txtInput.Count
+    Cells(row, 1).Value = txtInput(row)
+Next row
+'Debug.Print (text)
+'ObjExcel.Visible = False
+'    With Sheets(1)
+'      .Cells.VerticalAlignment = xlCenter
+'      .Cells.HorizontalAlignment = xlCenter
+'     .EntireRow.AutoFit
+'    End With
+ActiveWorkbook.SaveAs fileName:=strPath + "\" + xlsname + ".xls"
+ActiveWorkbook.Application.Quit
+End If
+Next objsfile
+End Sub
